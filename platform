@@ -1,0 +1,87 @@
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local isClimbing = false
+local tracker = nil
+local sizeIncrement = 1
+local partSize = Vector3.new(26, 1, 26)
+local partMaterial = Enum.Material.CrackedLava
+local partColor = Color3.fromRGB(150, 61, 66)
+local partTransparency = 0.5 
+
+-- Function to create the platform at the current player's position
+local function createPlatform()
+	if tracker then
+		tracker:Destroy()
+	end
+	
+	local instance = Instance.new("Part")
+	instance.Size = partSize
+	instance.Material = partMaterial
+	instance.Color = partColor
+	instance.Transparency = partTransparency -- Set transparency of the part
+	instance.Anchored = true -- Ensure the part stays in place
+	instance.Parent = workspace
+	instance.Position = Player.Character.HumanoidRootPart.Position + Vector3.new(0, -5, 0) -- Set initial position
+	
+	tracker = instance
+end
+
+-- Function to destroy the platform
+local function stopPlatform()
+	if tracker then
+		tracker:Destroy()
+		tracker = nil
+	end
+end
+
+-- Function to create the GUI
+local function createGUI()
+	local screenGui = Instance.new("ScreenGui", Player:WaitForChild("PlayerGui"))
+	local buttonStyle = {
+		Size = UDim2.new(0, 200, 0, 50),
+		BackgroundColor3 = Color3.fromRGB(50, 50, 50), -- Dark gray
+		TextColor3 = Color3.new(1, 1, 1), -- White text
+		Font = Enum.Font.Gotham,
+		TextSize = 20,
+		BorderSizePixel = 0,
+	}
+
+	local function createButton(text, position, onClick)
+		local button = Instance.new("TextButton", screenGui)
+		button.Size = buttonStyle.Size
+		button.Position = position
+		button.BackgroundColor3 = buttonStyle.BackgroundColor3
+		button.Text = text
+		button.TextColor3 = buttonStyle.TextColor3
+		button.Font = buttonStyle.Font
+		button.TextSize = buttonStyle.TextSize
+		button.BorderSizePixel = buttonStyle.BorderSizePixel
+
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 12) -- Rounded edges
+		corner.Parent = button
+
+		button.MouseButton1Click:Connect(onClick)
+
+		return button
+	end
+
+	-- Create buttons
+	createButton("Create Platform", UDim2.new(0.5, -100, 0, 10), createPlatform)
+	createButton("Stop Platform", UDim2.new(0.5, -100, 0, 70), stopPlatform)
+	createButton("Bigger Platform", UDim2.new(0.5, -100, 0, 130), function()
+		partSize = partSize + Vector3.new(sizeIncrement, sizeIncrement, sizeIncrement)
+		if tracker then
+			tracker.Size = partSize
+		end
+	end)
+	createButton("Smaller Platform", UDim2.new(0.5, -100, 0, 190), function()
+		partSize = partSize - Vector3.new(sizeIncrement, sizeIncrement, sizeIncrement)
+		if tracker then
+			tracker.Size = partSize
+		end
+	end)
+end
+
+-- Call the function to create the GUI
+createGUI()
